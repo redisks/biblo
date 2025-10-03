@@ -58,7 +58,7 @@ export async function POST(request: NextRequest) {
       { _id: new ObjectId(borrow.userId) },
       { 
         $inc: { currentBorrows: -1 },
-        $pull: { borrowedBooks: borrow.bookId }
+        $pull: { borrowedBooks: borrow.bookId } as any // Исправление типизации
       }
     )
 
@@ -76,8 +76,7 @@ export async function POST(request: NextRequest) {
           <hr>
           <p><strong>Книга:</strong> "${borrow.book.title}"</p>
           <p><strong>Автор:</strong> ${borrow.book.author || 'не указан'}</p>
-          <p><strong>Издательство:</strong> ${borrow.book.publisher || 'не указано'}</p>
-          <p><strong>Год:</strong> ${borrow.book.year || 'не указан'}</p>
+          <p><strong>Издательство и год:</strong> ${borrow.book.publisher_year || 'не указано'}</p>
           <p><strong>Дата возврата:</strong> ${new Date().toLocaleDateString('ru-RU')}</p>
         </div>
       `

@@ -8,7 +8,7 @@ export async function POST(request: NextRequest) {
   try {
     const client = await clientPromise
     const db = client.db('library')
-    const borrowData = await request.json()
+    const borrowData: BorrowCreate = await request.json()
 
     // Преобразуем строки в Date объекты
     const borrowDate = new Date(borrowData.borrowDate)
@@ -69,7 +69,7 @@ export async function POST(request: NextRequest) {
         { _id: new ObjectId(borrowData.userId) },
         { 
           $inc: { currentBorrows: 1 },
-          $push: { borrowedBooks: new ObjectId(borrowData.bookId) }
+          $push: { borrowedBooks: new ObjectId(borrowData.bookId) } as any // Исправление типизации
         }
       )
 
@@ -87,8 +87,7 @@ export async function POST(request: NextRequest) {
           <hr>
           <p><strong>Книга:</strong> "${book.title}"</p>
           <p><strong>Автор:</strong> ${book.author || 'не указан'}</p>
-          <p><strong>Издательство:</strong> ${book.publisher || 'не указано'}</p>
-          <p><strong>Год:</strong> ${book.year || 'не указан'}</p>
+          <p><strong>Издательство и год:</strong> ${book.publisher_year || 'не указано'}</p>
           <p><strong>Дата взятия:</strong> ${borrowDate.toLocaleDateString('ru-RU')}</p>
           <p><strong>Планируемая дата возврата:</strong> ${dueDate.toLocaleDateString('ru-RU')}</p>
         </div>
@@ -99,7 +98,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ 
       _id: result.insertedId, 
       ...borrow,
-      book: book // Добавляем полную информацию о книге
+      book: book
     })
   } catch (error) {
     console.error('Borrow error:', error)
