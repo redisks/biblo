@@ -6,6 +6,7 @@ import { User, LogOut, Settings, Loader2, Menu, X } from "lucide-react";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { useRouter, usePathname } from "next/navigation";
+import Link from 'next/link';
 
 export function Header() {
   const [user, setUser] = useState<any>(null);
@@ -83,9 +84,9 @@ export function Header() {
         <div className="container mx-auto px-4 py-3">
           <div className="flex items-center justify-between">
             {/* Логотип и название */}
-            <div className="flex items-center">
+            <Link href='/' className="flex items-center">
               <h1 className="text-xl sm:text-2xl font-bold">📚 Библиотека</h1>
-            </div>
+            </Link>
 
             {/* Десктопное меню */}
             <div className="hidden md:flex items-center gap-4">
