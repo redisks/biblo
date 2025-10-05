@@ -24,6 +24,7 @@ import { BorrowForm } from "./BorrowForm";
 import { useState } from "react";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
+import { Loader2 } from "lucide-react";
 
 interface BookCardProps {
   book: Book;
@@ -39,7 +40,6 @@ export function BookCard({ book }: BookCardProps) {
     // Проверяем авторизацию только при клике
     const response = await fetch("/api/auth/user");
     if (response.ok) {
-      const userData = await response.json();
       setShowBorrowForm(true);
     } else {
       router.push("/auth/login");
@@ -90,10 +90,8 @@ export function BookCard({ book }: BookCardProps) {
 
       if (returnResponse.ok) {
         toast.success("Книга успешно возвращена!");
-        // Плавное обновление
-        setTimeout(() => {
-          router.refresh();
-        }, 500);
+        // Заменяем window.location.reload на router.refresh
+        router.refresh();
       } else {
         const error = await returnResponse.json();
         toast.error(error.error || "Ошибка при возврате книги");
@@ -196,18 +194,36 @@ export function BookCard({ book }: BookCardProps) {
 
       {/* Диалог подтверждения возврата */}
       <AlertDialog open={showReturnDialog} onOpenChange={setShowReturnDialog}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Возврат книги</AlertDialogTitle>
-            <AlertDialogDescription>
+        <AlertDialogContent className="max-w-5/6 sm:max-w-md mx-auto">
+          <AlertDialogHeader className="text-center sm:text-left">
+            <AlertDialogTitle className="text-lg sm:text-xl">
+              Возврат книги
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-sm sm:text-base">
               Вы уверены, что хотите вернуть книгу &quot;{book.title}&quot;?
               После возврата книга станет доступна для других читателей.
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel disabled={loading}>Отмена</AlertDialogCancel>
-            <AlertDialogAction onClick={handleReturnConfirm} disabled={loading}>
-              {loading ? "Возврат..." : "Вернуть книгу"}
+          <AlertDialogFooter className="flex flex-col sm:flex-row gap-2 sm:gap-0">
+            <AlertDialogCancel
+              className="mt-0 sm:mt-0 order-2 sm:order-1 w-full sm:w-auto"
+              disabled={loading}
+            >
+              Отмена
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleReturnConfirm}
+              disabled={loading}
+              className="order-1 sm:order-2 w-full sm:w-auto bg-destructive text-destructive-foreground hover:bg-destructive/90 transition-colors"
+            >
+              {loading ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                  Возврат...
+                </>
+              ) : (
+                "Вернуть книгу"
+              )}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

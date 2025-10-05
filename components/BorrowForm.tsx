@@ -85,10 +85,8 @@ export function BorrowForm({ book, onClose }: BorrowFormProps) {
       if (response.ok) {
         toast.success("Заявка на книгу отправлена!");
         onClose();
-        // Плавное обновление страницы
-        setTimeout(() => {
-          router.refresh();
-        }, 1000);
+        // Заменяем кастомные события на router.refresh
+        router.refresh();
       } else {
         const error = await response.json();
         toast.error(error.error || "Ошибка при отправке заявки");
@@ -102,9 +100,11 @@ export function BorrowForm({ book, onClose }: BorrowFormProps) {
 
   return (
     <Dialog open={true} onOpenChange={onClose}>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>Взять книгу: {book.title}</DialogTitle>
+      <DialogContent className="max-w-5/6 sm:max-w-lg mx-auto max-h-[90vh] overflow-y-auto">
+        <DialogHeader className="text-center sm:text-left">
+          <DialogTitle className="text-base sm:text-xl">
+            Взять книгу: {book.title}
+          </DialogTitle>
         </DialogHeader>
 
         {user && currentBorrows >= 3 && (
