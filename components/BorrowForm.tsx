@@ -1,59 +1,66 @@
-'use client'
+"use client";
 
-import { useState, useEffect } from 'react'
-import { Book } from '@/lib/models/Book'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
-import { addDays, format } from 'date-fns'
-import { toast } from 'sonner'
-import { useRouter } from 'next/navigation'
+import { useState, useEffect } from "react";
+import { Book } from "@/lib/models/Book";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { addDays, format } from "date-fns";
+import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 
 interface BorrowFormProps {
-  book: Book
-  onClose: () => void
+  book: Book;
+  onClose: () => void;
 }
 
 export function BorrowForm({ book, onClose }: BorrowFormProps) {
-  const [dueDate, setDueDate] = useState(format(addDays(new Date(), 30), 'yyyy-MM-dd'))
-  const [currentBorrows, setCurrentBorrows] = useState(0)
-  const [loading, setLoading] = useState(false)
-  const [user, setUser] = useState<any>(null)
-  const router = useRouter()
+  const [dueDate, setDueDate] = useState(
+    format(addDays(new Date(), 30), "yyyy-MM-dd")
+  );
+  const [currentBorrows, setCurrentBorrows] = useState(0);
+  const [loading, setLoading] = useState(false);
+  const [user, setUser] = useState<any>(null);
+  const router = useRouter();
 
   useEffect(() => {
     // Загружаем пользователя один раз при открытии формы
     const loadUser = async () => {
       try {
-        const response = await fetch('/api/auth/user')
+        const response = await fetch("/api/auth/user");
         if (response.ok) {
-          const userData = await response.json()
-          setUser(userData)
-          setCurrentBorrows(userData.currentBorrows || 0)
+          const userData = await response.json();
+          setUser(userData);
+          setCurrentBorrows(userData.currentBorrows || 0);
         }
       } catch (error) {
-        console.error('Error loading user:', error)
+        console.error("Error loading user:", error);
       }
-    }
+    };
 
-    loadUser()
-  }, [])
+    loadUser();
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    
+    e.preventDefault();
+
     if (!user) {
-      toast.error('Пользователь не найден')
-      return
+      toast.error("Пользователь не найден");
+      return;
     }
 
-    setLoading(true)
-    
+    setLoading(true);
+
     if (currentBorrows >= 3) {
-      toast.error('Вы не можете взять больше 3 книг одновременно')
-      setLoading(false)
-      return
+      toast.error("Вы не можете взять больше 3 книг одновременно");
+      setLoading(false);
+      return;
     }
 
     const borrowData = {
@@ -63,35 +70,35 @@ export function BorrowForm({ book, onClose }: BorrowFormProps) {
       userEmail: user.email,
       userTelegram: user.telegram,
       borrowDate: new Date().toISOString(),
-      dueDate: new Date(dueDate).toISOString()
-    }
+      dueDate: new Date(dueDate).toISOString(),
+    };
 
     try {
-      const response = await fetch('/api/borrow', {
-        method: 'POST',
+      const response = await fetch("/api/borrow", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify(borrowData),
-      })
+      });
 
       if (response.ok) {
-        toast.success('Заявка на книгу отправлена!')
-        onClose()
+        toast.success("Заявка на книгу отправлена!");
+        onClose();
         // Плавное обновление страницы
         setTimeout(() => {
-          router.refresh()
-        }, 1000)
+          router.refresh();
+        }, 1000);
       } else {
-        const error = await response.json()
-        toast.error(error.error || 'Ошибка при отправке заявки')
+        const error = await response.json();
+        toast.error(error.error || "Ошибка при отправке заявки");
       }
     } catch (error) {
-      toast.error('Ошибка при отправке заявки')
+      toast.error("Ошибка при отправке заявки");
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   return (
     <Dialog open={true} onOpenChange={onClose}>
@@ -99,11 +106,12 @@ export function BorrowForm({ book, onClose }: BorrowFormProps) {
         <DialogHeader>
           <DialogTitle>Взять книгу: {book.title}</DialogTitle>
         </DialogHeader>
-        
+
         {user && currentBorrows >= 3 && (
           <div className="bg-yellow-50 border border-yellow-200 rounded-md p-4">
             <p className="text-yellow-800 text-sm">
-              <strong>Внимание:</strong> У вас уже {currentBorrows} книг. Максимальное количество - 3.
+              <strong>Внимание:</strong> У вас уже {currentBorrows} книг.
+              Максимальное количество - 3.
             </p>
           </div>
         )}
@@ -112,7 +120,9 @@ export function BorrowForm({ book, onClose }: BorrowFormProps) {
           {user && (
             <>
               <div>
-                <Label htmlFor="userName">Имя и фамилия</Label>
+                <Label htmlFor="userName" className="pb-2">
+                  Имя и фамилия
+                </Label>
                 <Input
                   id="userName"
                   value={`${user.firstName} ${user.lastName}`}
@@ -120,24 +130,24 @@ export function BorrowForm({ book, onClose }: BorrowFormProps) {
                 />
               </div>
               <div>
-                <Label htmlFor="userEmail">Email</Label>
-                <Input
-                  id="userEmail"
-                  value={user.email}
-                  readOnly
-                />
+                <Label htmlFor="userEmail" className="pb-2">
+                  Email
+                </Label>
+                <Input id="userEmail" value={user.email} readOnly />
               </div>
             </>
           )}
           <div>
-            <Label htmlFor="dueDate">Планируемая дата возврата</Label>
+            <Label htmlFor="dueDate" className="pb-2">
+              Планируемая дата возврата
+            </Label>
             <Input
               id="dueDate"
               type="date"
               value={dueDate}
               onChange={(e) => setDueDate(e.target.value)}
-              min={format(new Date(), 'yyyy-MM-dd')}
-              max={format(addDays(new Date(), 30), 'yyyy-MM-dd')}
+              min={format(new Date(), "yyyy-MM-dd")}
+              max={format(addDays(new Date(), 30), "yyyy-MM-dd")}
               required
             />
             <p className="text-sm text-muted-foreground mt-1">
@@ -145,17 +155,20 @@ export function BorrowForm({ book, onClose }: BorrowFormProps) {
             </p>
           </div>
           <div className="flex gap-2">
-            <Button 
-              type="submit" 
+            <Button
+              type="submit"
               className="flex-1"
               disabled={!user || currentBorrows >= 3 || loading}
             >
-              {loading ? "Отправка..." : 
-               currentBorrows >= 3 ? 'Превышен лимит книг' : 'Отправить заявку'}
+              {loading
+                ? "Отправка..."
+                : currentBorrows >= 3
+                ? "Превышен лимит книг"
+                : "Отправить заявку"}
             </Button>
-            <Button 
-              type="button" 
-              variant="outline" 
+            <Button
+              type="button"
+              variant="outline"
               onClick={onClose}
               disabled={loading}
             >
@@ -165,5 +178,5 @@ export function BorrowForm({ book, onClose }: BorrowFormProps) {
         </form>
       </DialogContent>
     </Dialog>
-  )
+  );
 }
